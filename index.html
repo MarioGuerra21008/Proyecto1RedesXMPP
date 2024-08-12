@@ -13,6 +13,7 @@
         <button id="loginBtn">Iniciar sesión</button>
         <button id="logoutBtn">Cerrar sesión</button>
         <button id="deleteAccountBtn">Eliminar cuenta</button>
+        <button id="sendPrivateMessageBtn">Enviar Mensaje Privado</button>
         <button id="addContactBtn">Añadir Contacto</button>
         <button id="viewFriendRequestsBtn">Ver Solicitudes de Amistad</button>
         <button id="acceptFriendRequestBtn">Aceptar Solicitud de Amistad</button>
@@ -125,6 +126,21 @@
                 .catch(console.error);
         });
 
+        document.getElementById("sendPrivateMessageBtn").addEventListener("click", () => {
+            const recipient = prompt("Ingrese el nombre de usuario al que desea enviar el mensaje:");
+            const message = prompt("Ingrese el mensaje:");
+
+            fetch("/sendPrivateMessage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ recipient, message }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
     </script>
 </body>
 </html>

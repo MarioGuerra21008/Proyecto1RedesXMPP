@@ -96,6 +96,19 @@ app.get("/contacts", async (req, res) => {
     }
 });
 
+// Ruta para enviar un mensaje privado
+app.post("/sendPrivateMessage", async (req, res) => {
+    const { recipient, message } = req.body;
+    console.log("Enviando mensaje a:", recipient); // Log para verificar el destinatario
+    try {
+        await xmppClient.privateMessage(recipient, message);
+        res.status(200).send(`Mensaje enviado a ${recipient}`);
+    } catch (err) {
+        console.error('Error en la ruta /sendPrivateMessage:', err.message); // Log del error
+        res.status(500).send(err.message);
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

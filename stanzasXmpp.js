@@ -21,8 +21,12 @@ function createDeleteAccountStanza() {
     );
 }
 
-function createPresenceStanza(type) {
-    return xml("presence", { type });
+function createPresenceStanza(type, to = null) {
+    const attributes = { type };
+    if (to) {
+        attributes.to = to;
+    }
+    return xml("presence", attributes);
 }
 
 function getRosterStanza() {
@@ -33,12 +37,29 @@ function getRosterStanza() {
     );
 }
 
-module.exports = { getRosterStanza };
+function createAddContactStanza(jid, alias) {
+    return xml(
+        'iq',
+        { type: 'set', id: 'add_to_roster' },
+        xml('query', { xmlns: 'jabber:iq:roster' },
+            xml('item', { jid: jid, name: alias })
+        )
+    );
+}
 
+function createPrivateMessageStanza(recipient, messageText, domain) {
+    return xml(
+        'message',
+        { to: `${recipient}@${domain}`, type: 'chat' },
+        xml('body', {}, messageText)
+    );
+}
 
 module.exports = {
     createRegisterStanza,
     createDeleteAccountStanza,
     createPresenceStanza,
     getRosterStanza,
+    createAddContactStanza,
+    createPrivateMessageStanza,
 };

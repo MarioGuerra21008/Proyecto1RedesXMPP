@@ -1,5 +1,12 @@
-const { client, xml } = require("@xmpp/client");
-const { createRegisterStanza, createDeleteAccountStanza, createPresenceStanza, getRosterStanza } = require("./stanzasXmpp");
+const { client } = require("@xmpp/client");
+const {
+    createRegisterStanza,
+    createDeleteAccountStanza,
+    createPresenceStanza,
+    getRosterStanza,
+    createAddContactStanza,
+    createPrivateMessageStanza
+} = require("./stanzasXmpp");
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 
@@ -121,10 +128,7 @@ async function deleteAccount() {
 
 async function addContact(contact) {
     try {
-        const presenceStanza = xml(
-            'presence',
-            { to: `${contact}@${domain}`, type: 'subscribe' }
-        );
+        const presenceStanza = createPresenceStanza("subscribe", `${contact}@${domain}`);
         xmpp.send(presenceStanza);
         console.log(`Solicitud de amistad enviada a ${contact}.`);
     } catch (err) {
@@ -135,13 +139,7 @@ async function addContact(contact) {
 
 async function addContactToRoster(jid, alias) {
     try {
-        const rosterStanza = xml(
-            'iq',
-            { type: 'set', id: 'add_to_roster' },
-            xml('query', { xmlns: 'jabber:iq:roster' },
-                xml('item', { jid: jid, name: alias })
-            )
-        );
+        const rosterStanza = createAddContactStanza(jid, alias);
 
         await xmpp.send(rosterStanza);
         console.log(`Contacto ${jid.split('@')[0]} agregado con el nombre ${alias}.`);
@@ -150,7 +148,6 @@ async function addContactToRoster(jid, alias) {
         throw err;
     }
 }
-
 
 async function viewFriendRequests() {
     if (friendRequest.length === 0) {
@@ -166,10 +163,7 @@ async function viewFriendRequests() {
 
 async function acceptFriendRequest(jid, alias) {
     try {
-        const presenceStanza = xml(
-            'presence',
-            { to: jid, type: 'subscribed' }
-        );
+        const presenceStanza = createPresenceStanza("subscribed", jid);
         await xmpp.send(presenceStanza);
         await addContactToRoster(jid, alias);
     } catch (err) {
@@ -236,5 +230,30 @@ async function showUsersInServer() {
     }
 }
 
-module.exports = { register, login, logout, deleteAccount, addContact, addContactToRoster, viewFriendRequests, 
-    acceptFriendRequest, getContacts, showUsersInServer, };
+async function privateMessage(recipient, messageText) {
+    if (!recipient || !messageText) {
+        throw new Error("Destinatario y mensaje son obligatorios.");
+    }
+    try {
+        const messageStanza = createPrivateMessageStanza(recipient, messageText, domain);
+        await xmpp.send(messageStanza);
+        console.log(`Mensaje enviado a ${recipient}.`);
+    } catch (err) {
+        console.error('Error al enviar el mensaje privado:', err.message);
+        throw err;
+    }
+}
+
+module.exports = {
+    register,
+    login,
+    logout,
+    deleteAccount,
+    addContact,
+    addContactToRoster,
+    viewFriendRequests,
+    acceptFriendRequest,
+    getContacts,
+    showUsersInServer,
+    privateMessage
+};
