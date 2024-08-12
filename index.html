@@ -3,15 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AlumChat</title>
+    <title>Alumchat Redes 2024</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Bienvenido a AlumChat</h1>
+    <h1>Bienvenido a Alumchat!</h1>
     <div id="form-container">
         <button id="registerBtn">Registrarse</button>
         <button id="loginBtn">Iniciar sesión</button>
         <button id="logoutBtn">Cerrar sesión</button>
+        <button id="deleteAccountBtn">Eliminar cuenta</button>
+        <button id="addContactBtn">Añadir Contacto</button>
+        <button id="viewFriendRequestsBtn">Ver Solicitudes de Amistad</button>
+        <button id="acceptFriendRequestBtn">Aceptar Solicitud de Amistad</button>
+        <button id="showContactsBtn">Mostrar Contactos</button>
+        <div id="contactsList"></div>
     </div>
 
     <script>
@@ -55,6 +61,70 @@
             .then(alert)
             .catch(console.error);
         });
+
+        document.getElementById("deleteAccountBtn").addEventListener("click", () => {
+        if (confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.")) {
+            fetch("/deleteAccount", {
+                method: "POST",
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        }});
+
+        document.getElementById("addContactBtn").addEventListener("click", () => {
+            const contact = prompt("Ingrese el nombre de usuario que desea agregar:");
+            fetch("/addContact", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ contact }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("viewFriendRequestsBtn").addEventListener("click", () => {
+            fetch("/viewFriendRequests")
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("acceptFriendRequestBtn").addEventListener("click", () => {
+            const jid = prompt("Ingrese el JID de la solicitud de amistad:");
+            const alias = prompt("Ingrese un nombre o alias para este contacto:");
+            fetch("/acceptFriendRequest", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ jid, alias }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("showContactsBtn").addEventListener("click", () => {
+            fetch("/contacts")
+                .then(response => response.json())
+                .then(data => {
+                    const contactsList = document.getElementById("contactsList");
+                    contactsList.innerHTML = "<h3>Contactos:</h3>";
+                    if (data.length === 0) {
+                        contactsList.innerHTML += "<p>No tienes contactos en tu lista.</p>";
+                    } else {
+                        data.forEach(contact => {
+                            contactsList.innerHTML += `<p>Nombre: ${contact.name}, JID: ${contact.jid}, Estado: ${contact.presence}</p>`;
+                        });
+                    }
+                })
+                .catch(console.error);
+        });
+
     </script>
 </body>
 </html>
