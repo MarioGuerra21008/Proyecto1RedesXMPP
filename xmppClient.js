@@ -1,4 +1,4 @@
-const { client } = require("@xmpp/client");
+const { client, xml } = require("@xmpp/client");
 const {
     createRegisterStanza,
     createDeleteAccountStanza,
@@ -71,6 +71,7 @@ async function login(usernameInput, passwordInput) {
             const presenceStanza = createPresenceStanza("online");
             await xmpp.send(presenceStanza);
 
+            /*
             xmpp.on("stanza", (stanza) => {
                 console.log("Stanza recibida:", stanza.toString());
                 if (stanza.is("message")) {
@@ -84,6 +85,8 @@ async function login(usernameInput, passwordInput) {
                     }
                 }
             });
+            */
+           resolve();
         });
 
         try {
@@ -227,6 +230,21 @@ async function getContacts() {
     return Object.values(contacts);
 }
 
+async function showUser(name) {
+    try {
+        const contacts = await getContacts();
+        console.log(name);
+        const contact = contacts.find(contact => contact.name === name);
+        if (contact) {
+            console.log(`Detalles de contacto:\nNombre: ${contact.name}\nJID: ${contact.jid}\nEstado: ${contact.presence}`);
+        } else {
+            console.log("Contacto no encontrado.");
+        }
+    } catch (err) {
+        console.error('Error al obtener detalles del contacto:', err.message);
+    }
+}
+
 async function showUsersInServer() {
     try {
         const contacts = await getContacts();
@@ -267,6 +285,7 @@ module.exports = {
     viewFriendRequests,
     acceptFriendRequest,
     getContacts,
+    showUser,
     showUsersInServer,
     privateMessage,
 };

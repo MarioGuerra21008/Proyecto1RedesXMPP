@@ -86,6 +86,22 @@ app.post("/acceptFriendRequest", async (req, res) => {
     }
 });
 
+// Ruta para mostrar detalles de un contacto específico
+app.post("/contactDetails", async (req, res) => {
+    const { name } = req.body;
+    try {
+        const contacts = await xmppClient.showUser(name);
+        const contact = contacts.find(contact => contact.name === name);
+        if (contact) {
+            res.status(200).json(contact);
+        } else {
+            res.status(404).send("Contacto no encontrado.");
+        }
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
 // Ruta para mostrar usuarios y su estado
 app.get("/contacts", async (req, res) => {
     try {

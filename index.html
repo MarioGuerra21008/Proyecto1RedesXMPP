@@ -13,11 +13,12 @@
         <button id="loginBtn">Iniciar sesión</button>
         <button id="logoutBtn">Cerrar sesión</button>
         <button id="deleteAccountBtn">Eliminar cuenta</button>
-        <button id="sendPrivateMessageBtn">Enviar Mensaje Privado</button>
-        <button id="addContactBtn">Añadir Contacto</button>
-        <button id="viewFriendRequestsBtn">Ver Solicitudes de Amistad</button>
-        <button id="acceptFriendRequestBtn">Aceptar Solicitud de Amistad</button>
-        <button id="showContactsBtn">Mostrar Contactos</button>
+        <button id="sendPrivateMessageBtn">Enviar mensaje privado</button>
+        <button id="addContactBtn">Añadir contacto</button>
+        <button id="viewFriendRequestsBtn">Ver solicitudes de amistad</button>
+        <button id="acceptFriendRequestBtn">Aceptar solicitud de amistad</button>
+        <button id="showContactDetailsBtn">Mostrar detalles de un contacto</button>
+        <button id="showContactsBtn">Mostrar contactos</button>
         <div id="contactsList"></div>
     </div>
 
@@ -107,6 +108,29 @@
             .then(response => response.text())
             .then(alert)
             .catch(console.error);
+        });
+
+        document.getElementById("showContactDetailsBtn").addEventListener("click", () => {
+            const name = prompt("Ingrese el nombre del contacto:");
+
+            fetch("/contactDetails", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ name }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
+            .then(contact => {
+                alert(`Detalles de contacto:\nNombre: ${contact.name}\nJID: ${contact.jid}\nEstado: ${contact.presence}`);
+            })
+            .catch(err => alert(`Error: ${err.message}`));
         });
 
         document.getElementById("showContactsBtn").addEventListener("click", () => {
