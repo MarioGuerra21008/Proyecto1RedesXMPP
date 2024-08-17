@@ -70,7 +70,20 @@ async function login(usernameInput, passwordInput) {
             console.log("Conexión exitosa.");
             const presenceStanza = createPresenceStanza("online");
             await xmpp.send(presenceStanza);
-            resolve();
+
+            xmpp.on("stanza", (stanza) => {
+                console.log("Stanza recibida:", stanza.toString());
+                if (stanza.is("message")) {
+                    const body = stanza.getChildText('body');
+                    console.log("Esto es el cuerpo:", body)
+                    if (body) {
+                        const from = stanza.attrs.from.split('@')[0];
+                        console.log(`Mensaje recibido de ${from}: ${body}`);
+                    } else {
+                        console.log("Stanza de mensaje sin cuerpo:");
+                    }
+                }
+            });
         });
 
         try {
@@ -255,5 +268,5 @@ module.exports = {
     acceptFriendRequest,
     getContacts,
     showUsersInServer,
-    privateMessage
+    privateMessage,
 };

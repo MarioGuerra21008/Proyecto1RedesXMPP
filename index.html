@@ -111,8 +111,7 @@
 
         document.getElementById("showContactsBtn").addEventListener("click", () => {
             fetch("/contacts")
-                .then(response => response.json())
-                .then(data => {
+                .then(response => response.json()).then(data => {
                     const contactsList = document.getElementById("contactsList");
                     contactsList.innerHTML = "<h3>Contactos:</h3>";
                     if (data.length === 0) {
@@ -122,9 +121,8 @@
                             contactsList.innerHTML += `<p>Nombre: ${contact.name}, JID: ${contact.jid}, Estado: ${contact.presence}</p>`;
                         });
                     }
-                })
-                .catch(console.error);
-        });
+                }).catch(console.error);
+            });
 
         document.getElementById("sendPrivateMessageBtn").addEventListener("click", () => {
             const recipient = prompt("Ingrese el nombre de usuario al que desea enviar el mensaje:");
