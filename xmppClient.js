@@ -142,6 +142,33 @@ async function deleteAccount() {
     });
 }
 
+function setPresenceMessage(status, message) {
+    let presenceAttributes = {};
+    let presenceChildren = [];
+
+    if (status === "offline") {
+        presenceAttributes.type = "unavailable";
+    } else if (status !== "online") {
+        presenceChildren.push(xml("show", {}, status));
+    }
+
+    if (message) {
+        presenceChildren.push(xml("status", {}, message));
+        userPresenceMessage = message;
+    }
+
+    const presenceStanza = xml("presence", presenceAttributes, ...presenceChildren);
+    xmpp.send(presenceStanza);
+
+    userStatus = status;
+    console.log(`Estado establecido a "${status}" con el mensaje "${message || 'Ninguno'}".`);
+}
+
+function viewStatus() {
+    console.log(`Tu estado actual es: "${userStatus}"`);
+    console.log(`Tu mensaje actual es: "${userPresenceMessage}"`);
+}
+
 async function addContact(contact) {
     try {
         const presenceStanza = createPresenceStanza("subscribe", `${contact}@${domain}`);
@@ -233,7 +260,6 @@ async function getContacts() {
 async function showUser(name) {
     try {
         const contacts = await getContacts();
-        console.log(name);
         const contact = contacts.find(contact => contact.name === name);
         if (contact) {
             console.log(`Detalles de contacto:\nNombre: ${contact.name}\nJID: ${contact.jid}\nEstado: ${contact.presence}`);
@@ -280,6 +306,8 @@ module.exports = {
     login,
     logout,
     deleteAccount,
+    setPresenceMessage,
+    viewStatus,
     addContact,
     addContactToRoster,
     viewFriendRequests,

@@ -50,6 +50,27 @@ app.post("/deleteAccount", async (req, res) => {
     }
 });
 
+// Ruta para establecer el estado de presencia
+app.post("/setPresence", async (req, res) => {
+    const { status, message } = req.body;
+    try {
+        await xmppClient.setPresenceMessage(status, message);
+        res.status(200).send(`Estado de presencia actualizado a "${status}"`);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Ruta para ver el estado actual del usuario
+app.get("/viewStatus", async (req, res) => {
+    try {
+        const status = await xmppClient.viewStatus();
+        res.status(200).json(status);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
 // Ruta para añadir un contacto
 app.post("/addContact", async (req, res) => {
     const { contact } = req.body;

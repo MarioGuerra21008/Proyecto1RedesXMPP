@@ -13,6 +13,8 @@
         <button id="loginBtn">Iniciar sesión</button>
         <button id="logoutBtn">Cerrar sesión</button>
         <button id="deleteAccountBtn">Eliminar cuenta</button>
+        <button id="setPresenceBtn">Establecer estado de presencia</button>
+        <button id="viewStatusBtn">Ver estado actual</button>
         <button id="sendPrivateMessageBtn">Enviar mensaje privado</button>
         <button id="addContactBtn">Añadir contacto</button>
         <button id="viewFriendRequestsBtn">Ver solicitudes de amistad</button>
@@ -73,6 +75,31 @@
             .then(alert)
             .catch(console.error);
         }});
+
+        document.getElementById("setPresenceBtn").addEventListener("click", () => {
+            const status = prompt("Ingrese su estado (online, away, dnd, offline):");
+            const message = prompt("Ingrese un mensaje de presencia (opcional):");
+
+            fetch("/setPresence", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ status, message }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("viewStatusBtn").addEventListener("click", () => {
+            fetch("/viewStatus")
+            .then(response => response.json())
+            .then(status => {
+                alert(`Estado actual:\nEstado: ${status.userStatus}\nMensaje: ${status.userPresenceMessage}`);
+            })
+            .catch(console.error);
+        });
 
         document.getElementById("addContactBtn").addEventListener("click", () => {
             const contact = prompt("Ingrese el nombre de usuario que desea agregar:");
