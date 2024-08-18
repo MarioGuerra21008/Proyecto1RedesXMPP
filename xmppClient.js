@@ -1,4 +1,6 @@
 const { client, xml } = require("@xmpp/client");
+const fs = require('fs');
+const path = require('path');
 const {
     createRegisterStanza,
     createDeleteAccountStanza,
@@ -17,6 +19,7 @@ let username = null;
 let password = null;
 let friendRequest = [];
 let userStatus = "online";
+const imagePath = "./files/imagengraciosa.jpg"
 
 async function register(usernameInput, passwordInput) {
     return new Promise(async (resolve, reject) => {
@@ -70,23 +73,21 @@ async function login(usernameInput, passwordInput) {
             console.log("Conexión exitosa.");
             const presenceStanza = createPresenceStanza("online");
             await xmpp.send(presenceStanza);
-
-            /*
-            xmpp.on("stanza", (stanza) => {
-                console.log("Stanza recibida:", stanza.toString());
+            resolve();
+            xmpp.on("stanza", async (stanza) => {
                 if (stanza.is("message")) {
-                    const body = stanza.getChildText('body');
-                    console.log("Esto es el cuerpo:", body)
+                    const body = stanza.getChild("body");
+                    const from = stanza.attrs.from.split('@')[0];
                     if (body) {
-                        const from = stanza.attrs.from.split('@')[0];
-                        console.log(`Mensaje recibido de ${from}: ${body}`);
-                    } else {
-                        console.log("Stanza de mensaje sin cuerpo:");
+                        const message = body.children[0];
+                        console.log(`\nMensaje recibido de ${from}: ${message}`);
+                    } 
+                    else if (stanza.is('presence') && stanza.attrs.type === 'subscribe') {
+                        const from = stanza.attrs.from;
+                        friendRequest.push(from);
                     }
                 }
             });
-            */
-           resolve();
         });
 
         try {
@@ -301,6 +302,69 @@ async function privateMessage(recipient, messageText) {
     }
 }
 
+async function baseToFile(base64Data, savePath) {
+    const buffer = Buffer.from(base64Data, 'base64');
+    await fs.promises.writeFile(savePath, buffer);
+}
+
+async function readFile(filePath) {
+    const buffer = await fs.promises.readFile(filePath);
+    return buffer.toString('base64');
+}
+
+function encodeFileToBase64(filePath) {
+    return new Promise((resolve, reject) => {
+        fs.readFile(filePath, (err, data) => {
+            if (err) {
+                reject(err);
+            } else {
+                const base64Data = data.toString('base64');
+                resolve(base64Data);
+            }
+        });
+    });
+}
+
+async function sendFile(jid, filePath) {
+    try {
+        
+        const base64File = await encodeFileToBase64(filePath);
+
+        const messageStanza = xml(
+            'message',
+            { to: jid, type: 'chat' },
+            xml('body', {}, 'Archivo adjunto'),
+            xml('attachment', {}, base64File) // El archivo codificado en Base64
+        );
+
+        xmpp.send(messageStanza);
+        console.log(`File sent to ${jid}`);
+    } catch (error) {
+        console.error(`Error sending file: ${error.message}`);
+    }
+}
+
+function createGroupChat(roomName) {
+    const roomJid = `${roomName}@conference.${domain}`;
+    const presenceStanza = xml("presence", { to: `${roomJid}/${username}` });
+    xmpp.send(presenceStanza);
+    console.log(`¡Has creado e ingresado a ${roomName}!, su jid es ${roomJid}`);
+}
+
+function joinGroupChat(roomName) {
+    const roomJid = `${roomName}@conference.${domain}`;
+    const presenceStanza = xml("presence", { to: `${roomJid}/${username}` });
+    xmpp.send(presenceStanza);
+    console.log(`Te has unido a ${roomName}, el jid es ${roomJid}`);
+}
+
+async function handleGroupMessages(roomName, message = null) {
+    const roomJid = `${roomName}@conference.${domain}`;
+    const messageStanza = xml("message", { to: roomJid, type: "groupchat" }, xml("body", {}, message));
+    xmpp.send(messageStanza);
+    console.log("Mensaje enviado al chat grupal.");
+}
+
 module.exports = {
     register,
     login,
@@ -316,4 +380,8 @@ module.exports = {
     showUser,
     showUsersInServer,
     privateMessage,
+    sendFile,
+    createGroupChat,
+    joinGroupChat,
+    handleGroupMessages
 };

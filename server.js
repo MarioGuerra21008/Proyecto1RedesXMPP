@@ -146,6 +146,39 @@ app.post("/sendPrivateMessage", async (req, res) => {
     }
 });
 
+// Ruta para crear una sala de chat grupal
+app.post("/createGroupChat", async (req, res) => {
+    const { roomName } = req.body;
+    try {
+        xmppClient.createGroupChat(roomName);
+        res.status(200).send(`Sala de chat grupal "${roomName}" creada.`);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Ruta para unirse a una sala de chat grupal
+app.post("/joinGroupChat", async (req, res) => {
+    const { roomName } = req.body;
+    try {
+        xmppClient.joinGroupChat(roomName);
+        res.status(200).send(`Te has unido a la sala de chat grupal "${roomName}".`);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
+// Ruta para enviar un mensaje o imagen a una sala de chat grupal
+app.post("/sendGroupMessage", async (req, res) => {
+    const { roomName, message } = req.body;
+    try {
+        await xmppClient.handleGroupMessages(roomName, message);
+        res.status(200).send(`Mensaje enviado al chat grupal "${roomName}".`);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
