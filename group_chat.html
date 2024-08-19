@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Grupal</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Chats Grupales</h1>
+    <div id="form-container">
+        <button id="createGroupChatBtn">Crear sala de chat grupal</button>
+        <button id="joinGroupChatBtn">Unirse a sala de chat grupal</button>
+        <button id="sendGroupMessageBtn">Enviar mensaje a chat grupal</button>
+        <button id="backBtn">Volver al Panel Principal</button>
+    </div>
+
+    <script>
+        document.getElementById("createGroupChatBtn").addEventListener("click", () => {
+            const roomName = prompt("Ingrese el nombre de la sala de chat grupal:");
+            fetch("/createGroupChat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ roomName }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("joinGroupChatBtn").addEventListener("click", () => {
+            const roomName = prompt("Ingrese el nombre de la sala de chat grupal a la que desea unirse:");
+            fetch("/joinGroupChat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ roomName }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("sendGroupMessageBtn").addEventListener("click", () => {
+            const roomName = prompt("Ingrese el nombre de la sala de chat grupal:");
+            let message = null;
+            
+            message = prompt("Ingrese el mensaje:");
+
+            fetch("/sendGroupMessage", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ roomName, message }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("backBtn").addEventListener("click", () => {
+            window.location.href = 'main.html';
+        });
+    </script>
+</body>
+</html>

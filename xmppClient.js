@@ -1,6 +1,4 @@
 const { client, xml } = require("@xmpp/client");
-const fs = require('fs');
-const path = require('path');
 const {
     createRegisterStanza,
     createDeleteAccountStanza,
@@ -19,7 +17,6 @@ let username = null;
 let password = null;
 let friendRequest = [];
 let userStatus = "online";
-const imagePath = "./files/imagengraciosa.jpg"
 
 async function register(usernameInput, passwordInput) {
     return new Promise(async (resolve, reject) => {
@@ -34,11 +31,11 @@ async function register(usernameInput, passwordInput) {
             username: username,
             password: password,
         });
-
+        
         try {
             await xmpp.start();
         } catch (err) {
-            reject(new Error(err.message));
+            reject(new Error("Usuario registrado. Por favor inicie sesión."));
         }
 
         const registerStanza = createRegisterStanza(username, password);
@@ -47,7 +44,9 @@ async function register(usernameInput, passwordInput) {
             console.log("Registro exitoso!");
             resolve();
         }).catch((err) => {
-            reject(new Error("Error al registrarse."));
+            if (err.condition !== "not-authorized") {
+                reject(new Error("Error al registrarse." + err.message));
+            }
         });
     });
 }
@@ -166,8 +165,7 @@ function setPresenceMessage(status, message) {
 }
 
 function viewStatus() {
-    console.log(`Tu estado actual es: "${userStatus}"`);
-    console.log(`Tu mensaje actual es: "${userPresenceMessage}"`);
+    console.log(`Tu estado actual es: "${userStatus}"\nTu mensaje actual es: "${userPresenceMessage}"`);
 }
 
 async function addContact(contact) {
@@ -302,48 +300,6 @@ async function privateMessage(recipient, messageText) {
     }
 }
 
-async function baseToFile(base64Data, savePath) {
-    const buffer = Buffer.from(base64Data, 'base64');
-    await fs.promises.writeFile(savePath, buffer);
-}
-
-async function readFile(filePath) {
-    const buffer = await fs.promises.readFile(filePath);
-    return buffer.toString('base64');
-}
-
-function encodeFileToBase64(filePath) {
-    return new Promise((resolve, reject) => {
-        fs.readFile(filePath, (err, data) => {
-            if (err) {
-                reject(err);
-            } else {
-                const base64Data = data.toString('base64');
-                resolve(base64Data);
-            }
-        });
-    });
-}
-
-async function sendFile(jid, filePath) {
-    try {
-        
-        const base64File = await encodeFileToBase64(filePath);
-
-        const messageStanza = xml(
-            'message',
-            { to: jid, type: 'chat' },
-            xml('body', {}, 'Archivo adjunto'),
-            xml('attachment', {}, base64File) // El archivo codificado en Base64
-        );
-
-        xmpp.send(messageStanza);
-        console.log(`File sent to ${jid}`);
-    } catch (error) {
-        console.error(`Error sending file: ${error.message}`);
-    }
-}
-
 function createGroupChat(roomName) {
     const roomJid = `${roomName}@conference.${domain}`;
     const presenceStanza = xml("presence", { to: `${roomJid}/${username}` });
@@ -380,8 +336,7 @@ module.exports = {
     showUser,
     showUsersInServer,
     privateMessage,
-    sendFile,
     createGroupChat,
     joinGroupChat,
-    handleGroupMessages
+    handleGroupMessages,
 };

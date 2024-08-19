@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require('path');
 const bodyParser = require("body-parser");
 const xmppClient = require("./xmppClient");
 
@@ -7,6 +8,21 @@ const PORT = 3000;
 
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
+
+// Ruta para la página de inicio
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html'));
+});
+
+// Ruta para servir index.html después del inicio de sesión exitoso
+app.get('/main', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Ruta para servir group_chat.html
+app.get('/group-chat', (req, res) => {
+    res.sendFile(path.join(__dirname, 'group_chat.html'));
+});
 
 // Ruta para registrarse
 app.post("/register", async (req, res) => {
@@ -65,7 +81,7 @@ app.post("/setPresence", async (req, res) => {
 app.get("/viewStatus", async (req, res) => {
     try {
         const status = await xmppClient.viewStatus();
-        res.status(200).json(status);
+        res.status(200).json(`"${status}"`);
     } catch (err) {
         res.status(500).send(err.message);
     }
@@ -114,7 +130,7 @@ app.post("/contactDetails", async (req, res) => {
         const contacts = await xmppClient.showUser(name);
         const contact = contacts.find(contact => contact.name === name);
         if (contact) {
-            res.status(200).json(contact);
+            res.status(200).json(`${contact}`);
         } else {
             res.status(404).send("Contacto no encontrado.");
         }
@@ -127,7 +143,7 @@ app.post("/contactDetails", async (req, res) => {
 app.get("/contacts", async (req, res) => {
     try {
         const contacts = await xmppClient.showUsersInServer();
-        res.status(200).json(contacts);
+        res.status(200).json(`${contacts}`);
     } catch (err) {
         res.status(500).send(err.message);
     }

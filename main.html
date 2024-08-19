@@ -3,81 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alumchat Redes 2024</title>
+    <title>Funcionalidades Principales</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1>Bienvenido a Alumchat!</h1>
+    <h1>Panel Principal</h1>
     <div id="form-container">
-        <button id="registerBtn">Registrarse</button>
-        <button id="loginBtn">Iniciar sesión</button>
-        <button id="logoutBtn">Cerrar sesión</button>
-        <button id="deleteAccountBtn">Eliminar cuenta</button>
+        <button id="sendPrivateMessageBtn">Enviar mensaje privado</button>
         <button id="setPresenceBtn">Establecer estado de presencia</button>
         <button id="viewStatusBtn">Ver estado actual</button>
-        <button id="sendPrivateMessageBtn">Enviar mensaje privado</button>
         <button id="addContactBtn">Añadir contacto</button>
+        <button id="showContactsBtn">Mostrar contactos</button>
+        <button id="showContactDetailsBtn">Mostrar detalles de un contacto</button>
         <button id="viewFriendRequestsBtn">Ver solicitudes de amistad</button>
         <button id="acceptFriendRequestBtn">Aceptar solicitud de amistad</button>
-        <button id="showContactDetailsBtn">Mostrar detalles de un contacto</button>
-        <button id="createGroupChatBtn">Crear sala de chat grupal</button>
-        <button id="joinGroupChatBtn">Unirse a sala de chat grupal</button>
-        <button id="sendGroupMessageBtn">Enviar mensaje a chat grupal</button>
-        <button id="showContactsBtn">Mostrar contactos</button>
-        <div id="contactsList"></div>
+        <button id="groupChatBtn">Chats Grupales</button>
+        <button id="logoutBtn">Cerrar sesión</button>
+        <button id="deleteAccountBtn">Eliminar cuenta</button>
     </div>
 
     <script>
-        document.getElementById("registerBtn").addEventListener("click", () => {
-            const username = prompt("Ingrese su nombre de usuario:");
-            const password = prompt("Ingrese su contraseña:");
-
-            fetch("/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, password }),
-            })
-            .then(response => response.text())
-            .then(alert)
-            .catch(console.error);
-        });
-
-        document.getElementById("loginBtn").addEventListener("click", () => {
-            const username = prompt("Ingrese su nombre de usuario:");
-            const password = prompt("Ingrese su contraseña:");
-
-            fetch("/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, password }),
-            })
-            .then(response => response.text())
-            .then(alert)
-            .catch(console.error);
-        });
-
         document.getElementById("logoutBtn").addEventListener("click", () => {
             fetch("/logout", {
                 method: "POST",
             })
-            .then(response => response.text())
-            .then(alert)
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = 'login.html';
+                } else {
+                    response.text().then(alert);
+                }
+            })
             .catch(console.error);
         });
 
         document.getElementById("deleteAccountBtn").addEventListener("click", () => {
-        if (confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.")) {
-            fetch("/deleteAccount", {
-                method: "POST",
-            })
-            .then(response => response.text())
-            .then(alert)
-            .catch(console.error);
-        }});
+            if (confirm("¿Estás seguro de que deseas eliminar tu cuenta? Esta acción es irreversible.")) {
+                fetch("/deleteAccount", {
+                    method: "POST",
+                })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = 'login.html';
+                    } else {
+                        response.text().then(alert);
+                    }
+                })
+                .catch(console.error);
+            }
+        });
 
         document.getElementById("setPresenceBtn").addEventListener("click", () => {
             const status = prompt("Ingrese su estado (online, away, dnd, offline):");
@@ -194,50 +168,8 @@
             .catch(console.error);
         });
 
-        document.getElementById("createGroupChatBtn").addEventListener("click", () => {
-            const roomName = prompt("Ingrese el nombre de la sala de chat grupal:");
-            fetch("/createGroupChat", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ roomName }),
-            })
-            .then(response => response.text())
-            .then(alert)
-            .catch(console.error);
-        });
-
-        document.getElementById("joinGroupChatBtn").addEventListener("click", () => {
-            const roomName = prompt("Ingrese el nombre de la sala de chat grupal a la que desea unirse:");
-            fetch("/joinGroupChat", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ roomName }),
-            })
-            .then(response => response.text())
-            .then(alert)
-            .catch(console.error);
-        });
-
-        document.getElementById("sendGroupMessageBtn").addEventListener("click", () => {
-            const roomName = prompt("Ingrese el nombre de la sala de chat grupal:");
-            let message = null;
-            
-            message = prompt("Ingrese el mensaje:");
-
-            fetch("/sendGroupMessage", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ roomName, message }),
-            })
-            .then(response => response.text())
-            .then(alert)
-            .catch(console.error);
+        document.getElementById("groupChatBtn").addEventListener("click", () => {
+            window.location.href = 'group_chat.html';
         });
     </script>
 </body>

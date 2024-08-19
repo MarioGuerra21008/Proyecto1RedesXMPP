@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro e Inicio de Sesión - Alumchat Redes 2024</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>Bienvenido a Alumchat!</h1>
+    <div id="form-container">
+        <button id="registerBtn">Registrarse</button>
+        <button id="loginBtn">Iniciar sesión</button>
+    </div>
+
+    <script>
+        document.getElementById("registerBtn").addEventListener("click", () => {
+            const username = prompt("Ingrese su nombre de usuario:");
+            const password = prompt("Ingrese su contraseña:");
+
+            fetch("/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => response.text())
+            .then(alert)
+            .catch(console.error);
+        });
+
+        document.getElementById("loginBtn").addEventListener("click", () => {
+            const username = prompt("Ingrese su nombre de usuario:");
+            const password = prompt("Ingrese su contraseña:");
+
+            fetch("/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.href = 'main.html';
+                } else {
+                    response.text().then(alert);
+                }
+            })
+            .catch(console.error);
+        });
+    </script>
+</body>
+</html>
