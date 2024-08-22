@@ -6,16 +6,31 @@
     <title>Chat Grupal</title>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <h1>Chats Grupales</h1>
-    <div id="form-container">
-        <button id="createGroupChatBtn">Crear sala de chat grupal</button>
-        <button id="joinGroupChatBtn">Unirse a sala de chat grupal</button>
-        <button id="sendGroupMessageBtn">Enviar mensaje a chat grupal</button>
-        <button id="backBtn">Volver al Panel Principal</button>
+<body class="group-chat-body">
+    <div class="left">
+        <h1>Chats Grupales</h1>
+        <div id="form-container" class="buttons">
+            <button id="createGroupChatBtn">Crear sala de chat grupal</button>
+            <button id="joinGroupChatBtn">Unirse a sala de chat grupal</button>
+            <button id="sendGroupMessageBtn">Enviar mensaje a chat grupal</button>
+            <button id="backBtn">Volver al Panel Principal</button>
+        </div>
     </div>
+    <div id="notifications" class="right"></div>
 
     <script>
+        const socket = new WebSocket('ws://localhost:3000');
+        socket.onmessage = function(event) {
+            const message = event.data;
+            const notification = document.createElement('div');
+            notification.textContent = message;
+            notification.className = 'notification';
+            document.getElementById('notifications').appendChild(notification);
+            setTimeout(() => {
+                notification.remove();
+            }, 10000);
+        };
+
         document.getElementById("createGroupChatBtn").addEventListener("click", () => {
             const roomName = prompt("Ingrese el nombre de la sala de chat grupal:");
             fetch("/createGroupChat", {

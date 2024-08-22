@@ -1,13 +1,30 @@
 const express = require("express");
 const path = require('path');
 const bodyParser = require("body-parser");
+const WebSocket = require('ws');
 const xmppClient = require("./xmppClient");
 
 const app = express();
 const PORT = 3000;
+const server = app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
+const wss = new WebSocket.Server({ server });
 
 app.use(bodyParser.json());
 app.use(express.static(__dirname));
+
+// Broadcasting para WebSockets
+function broadcast(data) {
+    wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+            client.send(data);
+        }
+    });
+}
+
+console.log = (msg) => broadcast(`${msg}`);
+console.error = (msg) => broadcast(`ERROR: ${msg}`);
 
 // Ruta para la página de inicio
 app.get('/', (req, res) => {
@@ -193,8 +210,4 @@ app.post("/sendGroupMessage", async (req, res) => {
     } catch (err) {
         res.status(500).send(err.message);
     }
-});
-
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
